@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { gameStateStore, RaceMetrics, GameStateType } from '../game/GameState';
 import { inputManager } from '../player/PlayerInput';
 import { Colors } from '../theme/colors';

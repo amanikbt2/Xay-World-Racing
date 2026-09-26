@@ -4,7 +4,6 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PlayerKart } from '../player/PlayerKart';
 import { PlayerPhysics } from '../player/PlayerPhysics';
-import { PlayerPhysics as Physics } from '../player/PlayerPhysics';
 
 interface GarageShowcase3DProps {
   kartColor?: string;

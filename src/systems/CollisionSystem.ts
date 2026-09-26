@@ -109,23 +109,28 @@ export class CollisionSystem {
     const kartPos = physics.position;
     const now = Date.now();
 
-    if (now - this.lastHitTime > 650) {
-      const obstacle = this.solidObstacles.find((item) => {
-        const distance = Math.hypot(kartPos.x - item.position.x, kartPos.z - item.position.z);
-        return distance < item.radius + 1.25;
-      });
-      const rival = this.racerPositions
-        .map((position) => ({ position, radius: 1.8 }))
-        .find((item) => Math.hypot(kartPos.x - item.position.x, kartPos.z - item.position.z) < item.radius + 1.25);
-      const hit = obstacle ?? rival;
+    const obstacle = this.solidObstacles.find((item) => {
+      const distance = Math.hypot(kartPos.x - item.position.x, kartPos.z - item.position.z);
+      return distance < item.radius + 1.25;
+    });
+    const rival = this.racerPositions
+      .map((position) => ({ position, radius: 1.8 }))
+      .find((item) => Math.hypot(kartPos.x - item.position.x, kartPos.z - item.position.z) < item.radius + 1.25);
+    const hit = obstacle ?? rival;
 
-      if (hit) {
+    if (hit) {
+      const away = new THREE.Vector3(kartPos.x - hit.position.x, 0, kartPos.z - hit.position.z);
+      if (away.lengthSq() < 0.001) away.set(Math.sin(physics.heading), 0, Math.cos(physics.heading));
+      const distance = Math.max(away.length(), 0.001);
+      away.normalize();
+
+      // Resolve the full overlap, not just a small nudge, so the kart cannot tunnel through.
+      const requiredPush = Math.max(0, (hit.radius + 1.3) - distance) + 0.08;
+      physics.position.addScaledVector(away, requiredPush);
+      physics.speed = 0;
+
+      if (now - this.lastHitTime > 180) {
         this.lastHitTime = now;
-        const away = new THREE.Vector3(kartPos.x - hit.position.x, 0, kartPos.z - hit.position.z);
-        if (away.lengthSq() < 0.001) away.set(Math.sin(physics.heading), 0, Math.cos(physics.heading));
-        away.normalize();
-        physics.position.addScaledVector(away, 0.65);
-        physics.speed = -Math.sign(physics.speed || 1) * Math.min(Math.abs(physics.speed) * 0.28, 8);
         physics.hitTimer = 0.35;
       }
     }
