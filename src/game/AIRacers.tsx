@@ -10,6 +10,7 @@ interface AIRacerProps {
   trackData: TrackConfigData;
   index: number;
   onProgress: (index: number, progress: number) => void;
+  onRacerPosition: (index: number, position: THREE.Vector3) => void;
 }
 
 const RIVALS = [
@@ -57,7 +58,7 @@ const RivalKart: React.FC<{ color: string }> = ({ color }) => (
   </group>
 );
 
-const AIRacer: React.FC<AIRacerProps> = ({ trackData, index, onProgress }) => {
+const AIRacer: React.FC<AIRacerProps> = ({ trackData, index, onProgress, onRacerPosition }) => {
   const groupRef = useRef<THREE.Group>(null);
   const progressRef = useRef(0.004 + index * 0.002);
   const curve = useMemo(() => {
@@ -88,6 +89,7 @@ const AIRacer: React.FC<AIRacerProps> = ({ trackData, index, onProgress }) => {
     point.addScaledVector(side, rival.lane);
     point.y = 0.08 + Math.sin(progress * 60 + index) * 0.025;
     groupRef.current.position.copy(point);
+    onRacerPosition(index, point);
     groupRef.current.rotation.y = Math.atan2(-tangent.x, -tangent.z);
     onProgress(index, progress);
   });
@@ -102,12 +104,13 @@ const AIRacer: React.FC<AIRacerProps> = ({ trackData, index, onProgress }) => {
 interface AIRacersProps {
   trackData: TrackConfigData;
   onProgress: (index: number, progress: number) => void;
+  onRacerPosition: (index: number, position: THREE.Vector3) => void;
 }
 
-export const AIRacers: React.FC<AIRacersProps> = ({ trackData, onProgress }) => (
+export const AIRacers: React.FC<AIRacersProps> = ({ trackData, onProgress, onRacerPosition }) => (
   <group>
     {RIVALS.map((rival, index) => (
-      <AIRacer key={rival.name} trackData={trackData} index={index} onProgress={onProgress} />
+      <AIRacer key={rival.name} trackData={trackData} index={index} onProgress={onProgress} onRacerPosition={onRacerPosition} />
     ))}
   </group>
 );

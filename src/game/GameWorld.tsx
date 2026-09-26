@@ -89,6 +89,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({
 
   useEffect(() => {
     lapSystem.reset();
+    collisionSystem.reset(trackData);
     physics.reset(trackData.startPosition, trackData.startHeading);
   }, [trackData, physics, lapSystem, collisionSystem]);
 
@@ -122,6 +123,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({
         <Track trackData={trackData} collisionSystem={collisionSystem} />
         <AIRacers
           trackData={trackData}
+          onRacerPosition={(index, position) => collisionSystem.setRacerPosition(index, position)}
           onProgress={(index, progress) => {
             aiProgress.current[index] = progress;
           }}

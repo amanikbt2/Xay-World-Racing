@@ -14,6 +14,7 @@ export class PlayerPhysics {
   public driftCharge: number = 0;
   public isBoosting: boolean = false;
   public boostTimer: number = 0;
+  public hitTimer: number = 0;
 
   private config: KartConfig = DEFAULT_KART_CONFIG;
 
@@ -42,6 +43,7 @@ export class PlayerPhysics {
   }
 
   public update(delta: number, input: InputState) {
+    this.hitTimer = Math.max(0, this.hitTimer - delta);
     // 1. Boost Timer update
     if (input.boost && !this.isBoosting && this.driftCharge >= 0.5) {
       this.isBoosting = true;

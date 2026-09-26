@@ -15,6 +15,7 @@ export const PlayerKart: React.FC<PlayerKartProps> = ({ physics, color = '#FF475
   const rearLeftWheel = useRef<THREE.Mesh>(null);
   const rearRightWheel = useRef<THREE.Mesh>(null);
   const boostLightRef = useRef<THREE.PointLight>(null);
+  const hitLightRef = useRef<THREE.PointLight>(null);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -31,6 +32,10 @@ export const PlayerKart: React.FC<PlayerKartProps> = ({ physics, color = '#FF475
     if (rearRightWheel.current) rearRightWheel.current.rotation.x += wheelSpin;
 
     // Boost light intensity
+    if (hitLightRef.current) {
+      hitLightRef.current.intensity = physics.hitTimer > 0 ? 8 : 0;
+    }
+
     if (boostLightRef.current) {
       boostLightRef.current.intensity = physics.isBoosting ? 5.0 : 0.0;
     }
@@ -118,6 +123,7 @@ export const PlayerKart: React.FC<PlayerKartProps> = ({ physics, color = '#FF475
 
       {/* Exhaust & Boost Light */}
       <pointLight ref={boostLightRef} position={[0, 0.4, 1.2]} color="#FFA502" distance={5} />
+      <pointLight ref={hitLightRef} position={[0, 0.8, 0]} color="#FF1F3D" distance={6} />
     </group>
   );
 };
