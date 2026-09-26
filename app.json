@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Xayrush Racing",
+    "slug": "xayrush-racing",
+    "version": "1.0.0",
+    "orientation": "landscape",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#121826"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.amanikbt1.xayworldracing"
+    },
+    "android": {
+      "package": "com.amanikbt1.xayworldracing",
+      "adaptiveIcon": {
+        "backgroundColor": "#121826"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    }
+  }
+}
