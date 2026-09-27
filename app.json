@@ -16,23 +16,28 @@
     "android": {
       "package": "com.amanikbt1.xayworldracing",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#121826"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "extra": {
-      "eas": {
-        "projectId": "143a8780-516c-4607-8d26-dc1012da39c0"
-      }
-    },
-    "owner": "sliver2",
     "plugins": [
       "expo-audio",
       "expo-asset"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e6555649-bb81-4dc1-96a7-10da2c6f3b03"
+      }
+    }
   }
 }
