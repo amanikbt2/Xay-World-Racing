@@ -22,6 +22,12 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "143a8780-516c-4607-8d26-dc1012da39c0"
+      }
+    },
+    "owner": "sliver2"
   }
 }
