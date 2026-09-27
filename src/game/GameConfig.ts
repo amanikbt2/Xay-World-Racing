@@ -31,9 +31,9 @@ export const DEFAULT_KART_CONFIG: KartConfig = {
 export const GAME_PHYSICS = {
   gravity: 25.0,
   groundY: 0.0,
-  cameraDistance: 9.0,
-  cameraHeight: 4.2,
+  cameraDistance: 7.2,
+  cameraHeight: 3.25,
   cameraLerpSpeed: 0.12,
-  cameraFovNormal: 60,
+  cameraFovNormal: 64,
   cameraFovBoost: 72,
 };

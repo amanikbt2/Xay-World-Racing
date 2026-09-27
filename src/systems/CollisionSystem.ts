@@ -18,7 +18,13 @@ export interface MovingHazardData {
 }
 interface SolidObstacle {
   position: THREE.Vector3;
-  radius: number;
+  radius?: number;
+  halfSize?: [number, number];
+}
+interface CollisionHit {
+  position: THREE.Vector3;
+  radius?: number;
+  halfSize?: [number, number];
 }
 
 export class CollisionSystem {
@@ -41,16 +47,17 @@ export class CollisionSystem {
         const radius = item.type === 'rock' ? 3.2 : item.type === 'palm' || item.type === 'tree' ? 2.4 : 2.8;
         this.solidObstacles.push({ position: new THREE.Vector3(...item.position), radius });
       });
+
       if (trackData.id === 'tropical_coast_lvl_1') {
         const buildings: [number, number, number, number][] = [
-          [-55, -40, 22, 13], [-85, -120, 26, 15], [-52, -210, 20, 12],
-          [-92, -300, 28, 16], [-58, -390, 24, 14], [-88, -480, 26, 15],
-          [-54, -570, 22, 13], [-86, -660, 25, 15], [-52, -750, 20, 12],
-          [-135, -80, 32, 18], [-145, -260, 35, 20], [-140, -450, 34, 19], [-145, -630, 36, 20],
+          [-55, -40, 22, 22], [-85, -120, 26, 24], [-52, -210, 20, 20],
+          [-92, -300, 28, 28], [-58, -390, 24, 22], [-88, -480, 26, 24],
+          [-54, -570, 22, 20], [-86, -660, 25, 25], [-52, -750, 20, 20],
+          [-135, -80, 32, 30], [-145, -260, 35, 32], [-140, -450, 34, 30], [-145, -630, 36, 34],
         ];
-        buildings.forEach(([x, z, width, radius]) => this.solidObstacles.push({
+        buildings.forEach(([x, z, width, depth]) => this.solidObstacles.push({
           position: new THREE.Vector3(x, 0, z),
-          radius,
+          halfSize: [width / 2, depth / 2],
         }));
 
         const lamps: [number, number][] = [
@@ -59,19 +66,26 @@ export class CollisionSystem {
         ];
         lamps.forEach(([x, z]) => this.solidObstacles.push({
           position: new THREE.Vector3(x, 0, z),
-          radius: 1.7,
+          radius: 1.3,
         }));
 
         for (let z = 40; z >= -820; z -= 50) {
           this.solidObstacles.push({
             position: new THREE.Vector3(-32, 0, z),
-            radius: 2.2,
+            radius: 1.6,
           });
         }
 
         this.solidObstacles.push({
           position: new THREE.Vector3(24, 0, -400),
-          radius: 2.2,
+          halfSize: [0.6, 425],
+        });
+
+        [[0, -120], [75, -310], [-30, -620]].forEach(([x, z]) => {
+          [-10, 10].forEach((offset) => this.solidObstacles.push({
+            position: new THREE.Vector3(x + offset, 0, z),
+            radius: 1.25,
+          }));
         });
       }
 
@@ -88,11 +102,13 @@ export class CollisionSystem {
           });
         }
       });
+
       this.boostPads = [];
       for (let i = 2; i < trackData.curvePoints.length - 1; i += 3) {
         const pt = trackData.curvePoints[i];
         this.boostPads.push({ id: i, position: [pt[0], pt[1], pt[2]] });
       }
+
       this.movingHazards = [];
       for (let i = 3; i < trackData.curvePoints.length - 1; i += 4) {
         const pt = trackData.curvePoints[i];
@@ -105,28 +121,58 @@ export class CollisionSystem {
     this.racerPositions[index] = position.clone();
   }
 
+  private findHit(position: THREE.Vector3): CollisionHit | undefined {
+    const cartRadius = 1.25;
+
+    for (const obstacle of this.solidObstacles) {
+      if (obstacle.halfSize) {
+        const dx = Math.abs(position.x - obstacle.position.x);
+        const dz = Math.abs(position.z - obstacle.position.z);
+        if (dx < obstacle.halfSize[0] + cartRadius && dz < obstacle.halfSize[1] + cartRadius) {
+          return obstacle;
+        }
+      } else if (
+        obstacle.radius !== undefined &&
+        Math.hypot(position.x - obstacle.position.x, position.z - obstacle.position.z) < obstacle.radius + cartRadius
+      ) {
+        return obstacle;
+      }
+    }
+
+    return this.racerPositions
+      .filter(Boolean)
+      .map((racerPosition) => ({ position: racerPosition, radius: 1.8 }))
+      .find((racer) => Math.hypot(position.x - racer.position.x, position.z - racer.position.z) < (racer.radius ?? 0) + cartRadius);
+  }
+
   public update(physics: PlayerPhysics) {
     const kartPos = physics.position;
     const now = Date.now();
-
-    const obstacle = this.solidObstacles.find((item) => {
-      const distance = Math.hypot(kartPos.x - item.position.x, kartPos.z - item.position.z);
-      return distance < item.radius + 1.25;
-    });
-    const rival = this.racerPositions
-      .map((position) => ({ position, radius: 1.8 }))
-      .find((item) => Math.hypot(kartPos.x - item.position.x, kartPos.z - item.position.z) < item.radius + 1.25);
-    const hit = obstacle ?? rival;
+    const hit = this.findHit(kartPos);
 
     if (hit) {
       const away = new THREE.Vector3(kartPos.x - hit.position.x, 0, kartPos.z - hit.position.z);
-      if (away.lengthSq() < 0.001) away.set(Math.sin(physics.heading), 0, Math.cos(physics.heading));
-      const distance = Math.max(away.length(), 0.001);
-      away.normalize();
+      let pushDistance = 0;
 
-      // Resolve the full overlap, not just a small nudge, so the kart cannot tunnel through.
-      const requiredPush = Math.max(0, (hit.radius + 1.3) - distance) + 0.08;
-      physics.position.addScaledVector(away, requiredPush);
+      if (hit.halfSize) {
+        const dx = kartPos.x - hit.position.x;
+        const dz = kartPos.z - hit.position.z;
+        const pushX = hit.halfSize[0] + 1.25 - Math.abs(dx);
+        const pushZ = hit.halfSize[1] + 1.25 - Math.abs(dz);
+        if (pushX <= pushZ) {
+          away.set(Math.sign(dx) || 1, 0, 0);
+          pushDistance = pushX;
+        } else {
+          away.set(0, 0, Math.sign(dz) || 1);
+          pushDistance = pushZ;
+        }
+      } else {
+        const distance = Math.max(away.length(), 0.001);
+        away.normalize();
+        pushDistance = (hit.radius ?? 1.8) + 1.25 - distance;
+      }
+
+      physics.position.addScaledVector(away.normalize(), Math.max(0, pushDistance) + 0.08);
       physics.speed = 0;
 
       if (now - this.lastHitTime > 180) {

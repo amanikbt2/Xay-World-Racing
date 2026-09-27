@@ -7,6 +7,7 @@ import { Colors } from '../theme/colors';
 export const GameHUD: React.FC = () => {
   const [metrics, setMetrics] = useState<RaceMetrics>(gameStateStore.getMetrics());
   const [gameState, setGameState] = useState<GameStateType>(gameStateStore.getState());
+  const [tutorialStep, setTutorialStep] = useState(0);
 
   useEffect(() => {
     const unsubscribe = gameStateStore.subscribe((state, m) => {
@@ -36,6 +37,19 @@ export const GameHUD: React.FC = () => {
     };
   }, [gameState]);
 
+  useEffect(() => {
+    const isTutorialRace = metrics.selectedTrackId === 'tropical_coast_lvl_1';
+    if (!isTutorialRace || gameState !== 'RACING') {
+      setTutorialStep(0);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTutorialStep((step) => Math.min(step + 1, 5));
+    }, 3200);
+
+    return () => clearInterval(timer);
+  }, [gameState, metrics.selectedTrackId]);
   const handleTouchDown = (key: 'accelerate' | 'brake' | 'steerLeft' | 'steerRight' | 'boost' | 'drift') => {
     inputManager.setTouchInput(key, true);
   };
@@ -152,6 +166,36 @@ export const GameHUD: React.FC = () => {
             {metrics.countdown > 0 ? metrics.countdown : 'GO!'}
           </Text>
           <View style={styles.countdownLine} />
+        </View>
+      )}
+      {metrics.selectedTrackId === 'tropical_coast_lvl_1' &&
+        (gameState === 'COUNTDOWN' || gameState === 'RACING') && (
+        <View style={styles.tutorialWrap} pointerEvents="box-none">
+          <TouchableOpacity
+            activeOpacity={0.92}
+            style={styles.tutorialBubble}
+            onPress={() => setTutorialStep((step) => Math.min(step + 1, 5))}
+          >
+            <View style={styles.officerBadge}>
+              <Text style={styles.officerEmoji}>🚓</Text>
+            </View>
+            <View style={styles.tutorialCopy}>
+              <Text style={styles.tutorialSpeaker}>RACE OFFICER</Text>
+              <Text style={styles.tutorialText}>
+                {gameState === 'COUNTDOWN'
+                  ? 'Welcome, rookie. Watch the lights and get ready!'
+                  : [
+                      'Tilt your phone left or right to steer.',
+                      'Press GAS to accelerate down the road.',
+                      'Brake before sharp corners and use DRIFT to turn.',
+                      'You are competing with other racers!',
+                      'Find the best route and reach the finish line!',
+                      'Great driving! Keep your speed and finish the tutorial.',
+                    ][tutorialStep]}
+              </Text>
+              <Text style={styles.tutorialHint}>TAP TO CONTINUE</Text>
+            </View>
+          </TouchableOpacity>
         </View>
       )}
       {/* Countdown / Pause Overlays */}
@@ -339,7 +383,65 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: 'bold',
   },
-  countdownOverlay: {
+  tutorialWrap: {
+    position: 'absolute',
+    top: 76,
+    left: 18,
+    right: 18,
+    alignItems: 'center',
+  },
+  tutorialBubble: {
+    maxWidth: 430,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 18,
+    backgroundColor: 'rgba(22, 35, 49, 0.92)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 220, 125, 0.78)',
+    shadowColor: '#07121E',
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  officerBadge: {
+    width: 45,
+    height: 45,
+    borderRadius: 24,
+    backgroundColor: '#2F79B7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    borderWidth: 2,
+    borderColor: '#BDE7FF',
+  },
+  officerEmoji: {
+    fontSize: 23,
+  },
+  tutorialCopy: {
+    flex: 1,
+  },
+  tutorialSpeaker: {
+    color: '#FFD166',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  tutorialText: {
+    color: '#F8FAFC',
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  tutorialHint: {
+    color: '#9DB5C8',
+    fontSize: 8,
+    fontWeight: '800',
+    marginTop: 4,
+    letterSpacing: 0.8,
+  },  countdownOverlay: {
     ...StyleSheet.absoluteFill,
     justifyContent: 'center',
     alignItems: 'center',

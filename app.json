@@ -16,6 +16,7 @@
     "android": {
       "package": "com.amanikbt1.xayworldracing",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#121826"
       }
     },
@@ -28,6 +29,10 @@
         "projectId": "143a8780-516c-4607-8d26-dc1012da39c0"
       }
     },
-    "owner": "sliver2"
+    "owner": "sliver2",
+    "plugins": [
+      "expo-audio",
+      "expo-asset"
+    ]
   }
 }

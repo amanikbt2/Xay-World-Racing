@@ -22,8 +22,8 @@ export const RacingCamera: React.FC<RacingCameraProps> = ({ physics }) => {
 
     // Speed dependent offset
     const speedRatio = Math.abs(physics.speed) / 38;
-    const dynamicDist = GAME_PHYSICS.cameraDistance + speedRatio * 2.5;
-    const dynamicHeight = GAME_PHYSICS.cameraHeight + speedRatio * 0.8;
+    const dynamicDist = GAME_PHYSICS.cameraDistance + speedRatio * 1.8;
+    const dynamicHeight = GAME_PHYSICS.cameraHeight + speedRatio * 0.55;
 
     const desiredCamX = physics.position.x - forwardX * dynamicDist;
     const desiredCamZ = physics.position.z - forwardZ * dynamicDist;

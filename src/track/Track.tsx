@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { TrackConfigData } from './TrackConfig';
 import { PalmTree, Rock, PineTree, CyberCrystal, StartArch, FinishArch, BeachScenery } from './TrackSegment';
-import { GoldenCoin, NitroBoostPad, MovingRoadHazard } from '../items/Collectible';
+import { GoldenCoin, NitroBoostPad } from '../items/Collectible';
 import { CollisionSystem } from '../systems/CollisionSystem';
 
 interface TrackProps {
