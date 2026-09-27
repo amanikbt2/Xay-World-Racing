@@ -38,6 +38,7 @@ class PlayerInputManager {
   }
 
   public enableTiltSensors() {
+    if (Platform.OS === 'web') return;
     try {
       Accelerometer.setUpdateInterval(30); // 30ms updates
       this.accelSubscription = Accelerometer.addListener((data) => {

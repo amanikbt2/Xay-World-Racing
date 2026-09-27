@@ -59,9 +59,9 @@ export const GameHUD: React.FC = () => {
   };
 
   return (
-    <View style={styles.overlayContainer} pointerEvents="box-none">
+    <View style={[styles.overlayContainer, { pointerEvents: 'box-none' }]}>
       {/* Top Header Metrics Bar */}
-      <View style={styles.topHeader} pointerEvents="box-none">
+      <View style={[styles.topHeader, { pointerEvents: 'box-none' }]}>
         {/* Position */}
         <View style={styles.statBadge}>
           <Text style={styles.statLabel}>POSITION</Text>
@@ -88,7 +88,7 @@ export const GameHUD: React.FC = () => {
       </View>
 
       {/* Speedometer & Boost Gauge */}
-      <View style={styles.speedometerBox} pointerEvents="none">
+      <View style={[styles.speedometerBox, { pointerEvents: 'none' }]}>
         <Text style={styles.speedValue}>{metrics.speed}</Text>
         <Text style={styles.speedUnit}>KM/H</Text>
         <View style={styles.boostBarBackground}>
@@ -106,7 +106,7 @@ export const GameHUD: React.FC = () => {
       </View>
 
       {/* On-Screen Mobile Touch Controls */}
-      <View style={styles.touchControlsContainer} pointerEvents="box-none">
+      <View style={[styles.touchControlsContainer, { pointerEvents: 'box-none' }]}>
         {/* Steering Left / Right (Left Side) */}
         <View style={styles.leftPadGroup}>
           <TouchableOpacity
@@ -160,7 +160,7 @@ export const GameHUD: React.FC = () => {
       </View>
 
       {gameState === 'COUNTDOWN' && (
-        <View style={styles.countdownOverlay} pointerEvents="none">
+        <View style={[styles.countdownOverlay, { pointerEvents: 'none' }]}>
           <Text style={styles.countdownLabel}>GET READY</Text>
           <Text style={styles.countdownNumber}>
             {metrics.countdown > 0 ? metrics.countdown : 'GO!'}
@@ -170,7 +170,7 @@ export const GameHUD: React.FC = () => {
       )}
       {metrics.selectedTrackId === 'tropical_coast_lvl_1' &&
         (gameState === 'COUNTDOWN' || gameState === 'RACING') && (
-        <View style={styles.tutorialWrap} pointerEvents="box-none">
+        <View style={[styles.tutorialWrap, { pointerEvents: 'box-none' }]}>
           <TouchableOpacity
             activeOpacity={0.92}
             style={styles.tutorialBubble}
@@ -400,10 +400,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(22, 35, 49, 0.92)',
     borderWidth: 1.5,
     borderColor: 'rgba(255, 220, 125, 0.78)',
-    shadowColor: '#07121E',
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 8,
+elevation: 8,
   },
   officerBadge: {
     width: 45,
@@ -452,18 +449,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '900',
     letterSpacing: 4,
-    textShadowColor: '#0F172A',
-    textShadowRadius: 8,
-  },
+},
   countdownNumber: {
     color: '#FFD166',
     fontSize: 112,
     lineHeight: 120,
     fontWeight: '900',
     fontStyle: 'italic',
-    textShadowColor: '#F97316',
-    textShadowRadius: 18,
-  },
+},
   countdownLine: {
     width: 86,
     height: 5,

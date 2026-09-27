@@ -155,10 +155,6 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     transform: [{ scale: 1.04 }],
-    shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 10,
     elevation: 8,
   },
   carVisualBox: {

@@ -164,10 +164,6 @@ export const Track: React.FC<TrackProps> = ({ trackData, collisionSystem }) => {
         <NitroBoostPad key={pad.id} position={pad.position} />
       ))}
 
-      {/* Moving Hazards */}
-      {collisionSystem.movingHazards.map((hazard) => (
-        <MovingRoadHazard key={hazard.id} position={hazard.position} />
-      ))}
     </group>
   );
 };
