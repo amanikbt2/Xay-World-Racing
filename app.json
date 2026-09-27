@@ -14,7 +14,11 @@
       "bundleIdentifier": "com.amanikbt1.xayworldracing"
     },
     "android": {
+      "versionCode": 2,
       "package": "com.amanikbt1.xayworldracing",
+      "blockedPermissions": [
+        "android.permission.ACTIVITY_RECOGNITION"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#121826"
@@ -32,7 +36,8 @@
     },
     "plugins": [
       "expo-audio",
-      "expo-asset"
+      "expo-asset",
+      "expo-build-properties"
     ],
     "extra": {
       "eas": {
