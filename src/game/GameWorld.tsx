@@ -11,7 +11,6 @@ import { TrackConfigData, TRACKS_DATA } from '../track/TrackConfig';
 import { LapSystem } from '../track/LapSystem';
 import { CollisionSystem } from '../systems/CollisionSystem';
 import { AIRacers, AI_RACER_COUNT } from './AIRacers';
-import { RaceAudio } from '../audio/RaceAudio';
 
 interface GameWorldProps {
   physics: PlayerPhysics;

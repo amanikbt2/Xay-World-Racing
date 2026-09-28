@@ -40,7 +40,8 @@ class PlayerInputManager {
   public enableTiltSensors() {
     if (Platform.OS === 'web') return;
     try {
-      Accelerometer.setUpdateInterval(30); // 30ms updates
+      if (!Accelerometer?.setUpdateInterval || !Accelerometer?.addListener) return;
+      Accelerometer.setUpdateInterval(30);
       this.accelSubscription = Accelerometer.addListener((data) => {
         if (!this.isTiltSteeringEnabled) return;
         // In landscape orientation, y-axis represents tilt roll angle
