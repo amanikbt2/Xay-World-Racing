@@ -14,7 +14,7 @@
       "bundleIdentifier": "com.amanikbt1.xayworldracing"
     },
     "android": {
-      "versionCode": 5,
+      "versionCode": 6,
       "package": "com.amanikbt1.xayworldracing",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
