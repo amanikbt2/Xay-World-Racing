@@ -1,5 +1,4 @@
 import { Platform } from 'react-native';
-import { Accelerometer } from 'expo-sensors';
 
 export interface InputState {
   accelerate: boolean;
@@ -34,34 +33,11 @@ class PlayerInputManager {
       window.addEventListener('keyup', this.handleKeyUp);
       window.addEventListener('deviceorientation', this.handleWebOrientation);
     }
-    this.enableTiltSensors();
+    // Tilt steering is temporarily disabled until the native sensor path is verified.
   }
 
   public enableTiltSensors() {
-    if (Platform.OS === 'web') return;
-    try {
-      if (!Accelerometer?.setUpdateInterval || !Accelerometer?.addListener) return;
-      Accelerometer.setUpdateInterval(30);
-      this.accelSubscription = Accelerometer.addListener((data) => {
-        if (!this.isTiltSteeringEnabled) return;
-        // In landscape orientation, y-axis represents tilt roll angle
-        const tilt = data.y; // -1 to 1
-        const deadzone = 0.08;
-
-        if (Math.abs(tilt) > deadzone) {
-          // Clamp tilt between -1 and 1
-          this.state.tiltSteerValue = Math.max(-1, Math.min(1, tilt * 2.2));
-          this.state.steerLeft = tilt < -deadzone;
-          this.state.steerRight = tilt > deadzone;
-        } else {
-          this.state.tiltSteerValue = 0;
-          this.state.steerLeft = false;
-          this.state.steerRight = false;
-        }
-      });
-    } catch (err) {
-      console.warn('Accelerometer not supported on this platform:', err);
-    }
+    return;
   }
 
   private handleWebOrientation = (e: DeviceOrientationEvent) => {
