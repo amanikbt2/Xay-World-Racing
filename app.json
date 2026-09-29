@@ -33,17 +33,21 @@
     },
     "plugins": [
       "expo-asset",
-      ["expo-build-properties", {
-        "android": {
-          "enableMinifyInReleaseBuilds": true,
-          "enableShrinkResourcesInReleaseBuilds": true
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
         }
-      }]
+      ]
     ],
     "extra": {
       "eas": {
-        "projectId": "e6555649-bb81-4dc1-96a7-10da2c6f3b03"
+        "projectId": "bbf36213-77cf-4de1-95b0-1c7193002bb8"
       }
-    }
+    },
+    "owner": "sliver4"
   }
 }
