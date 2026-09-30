@@ -11,10 +11,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amanikbt1.xayworldracing"
+      "bundleIdentifier": "com.amanikbt1.xayworldracing",
+      "buildNumber": "7"
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 7,
       "package": "com.amanikbt1.xayworldracing",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -25,6 +26,9 @@
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ],
+      "blockedPermissions": [
+        "android.permission.ACTIVITY_RECOGNITION"
       ]
     },
     "web": {

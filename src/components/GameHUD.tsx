@@ -40,8 +40,8 @@ export const GameHUD: React.FC = () => {
   useEffect(() => {
     const isTutorialRace = metrics.selectedTrackId === 'tropical_coast_lvl_1';
     if (!isTutorialRace || gameState !== 'RACING') {
-      setTutorialStep(0);
-      return;
+      const animationId = requestAnimationFrame(() => setTutorialStep(0));
+      return () => cancelAnimationFrame(animationId);
     }
 
     const timer = setInterval(() => {
@@ -59,9 +59,9 @@ export const GameHUD: React.FC = () => {
   };
 
   return (
-    <View style={[styles.overlayContainer, { pointerEvents: 'box-none' }]}>
+    <View pointerEvents="box-none" style={styles.overlayContainer}>
       {/* Top Header Metrics Bar */}
-      <View style={[styles.topHeader, { pointerEvents: 'box-none' }]}>
+      <View pointerEvents="box-none" style={styles.topHeader}>
         {/* Position */}
         <View style={styles.statBadge}>
           <Text style={styles.statLabel}>POSITION</Text>
@@ -88,7 +88,7 @@ export const GameHUD: React.FC = () => {
       </View>
 
       {/* Speedometer & Boost Gauge */}
-      <View style={[styles.speedometerBox, { pointerEvents: 'none' }]}>
+      <View pointerEvents="none" style={styles.speedometerBox}>
         <Text style={styles.speedValue}>{metrics.speed}</Text>
         <Text style={styles.speedUnit}>KM/H</Text>
         <View style={styles.boostBarBackground}>
@@ -106,7 +106,7 @@ export const GameHUD: React.FC = () => {
       </View>
 
       {/* On-Screen Mobile Touch Controls */}
-      <View style={[styles.touchControlsContainer, { pointerEvents: 'box-none' }]}>
+      <View pointerEvents="box-none" style={styles.touchControlsContainer}>
         {/* Steering Left / Right (Left Side) */}
         <View style={styles.leftPadGroup}>
           <TouchableOpacity
@@ -160,7 +160,7 @@ export const GameHUD: React.FC = () => {
       </View>
 
       {gameState === 'COUNTDOWN' && (
-        <View style={[styles.countdownOverlay, { pointerEvents: 'none' }]}>
+        <View pointerEvents="none" style={styles.countdownOverlay}>
           <Text style={styles.countdownLabel}>GET READY</Text>
           <Text style={styles.countdownNumber}>
             {metrics.countdown > 0 ? metrics.countdown : 'GO!'}
@@ -170,7 +170,7 @@ export const GameHUD: React.FC = () => {
       )}
       {metrics.selectedTrackId === 'tropical_coast_lvl_1' &&
         (gameState === 'COUNTDOWN' || gameState === 'RACING') && (
-        <View style={[styles.tutorialWrap, { pointerEvents: 'box-none' }]}>
+        <View pointerEvents="box-none" style={styles.tutorialWrap}>
           <TouchableOpacity
             activeOpacity={0.92}
             style={styles.tutorialBubble}

@@ -84,14 +84,15 @@ class GameStateManager {
 
   public subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
-    listener(this.currentState, this.metrics);
     return () => {
       this.listeners.delete(listener);
     };
   }
 
   private notify() {
-    this.listeners.forEach((l) => l(this.currentState, this.metrics));
+    queueMicrotask(() => {
+      this.listeners.forEach((l) => l(this.currentState, this.metrics));
+    });
   }
 }
 

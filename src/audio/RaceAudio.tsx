@@ -28,10 +28,13 @@ export const RaceAudio: React.FC<RaceAudioProps> = ({ physics }) => {
   const birds = useAudioPlayer(BIRDS);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     engine.loop = true;
     engine.volume = 0.42;
+    // eslint-disable-next-line react-hooks/immutability
     skid.loop = true;
     skid.volume = 0.16;
+    // eslint-disable-next-line react-hooks/immutability
     birds.loop = true;
     birds.volume = 0.08;
 

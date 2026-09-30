@@ -26,13 +26,13 @@ export const HomeScreen: React.FC = () => {
     <View style={styles.container}>
       <GarageShowcase3D kartColor={activeCar.color} />
 
-      <View style={[styles.vignette, { pointerEvents: 'none' }]} />
+      <View pointerEvents="none" style={styles.vignette} />
 
       <View style={styles.titlePill}>
         <Text style={styles.titleText}>RACE LEGENDS</Text>
       </View>
 
-      <View style={[styles.topHeader, { pointerEvents: 'box-none' }]}>
+      <View pointerEvents="box-none" style={styles.topHeader}>
         <GlassCard style={styles.rankCard}>
           <View style={styles.rankRow}>
             <View style={styles.rankIconBox}><BarChart3 size={18} color="#BFEAFF" /></View>
@@ -89,7 +89,7 @@ export const HomeScreen: React.FC = () => {
         </View>
       </GlassCard>
 
-      <View style={[styles.bottomDockContainer, { pointerEvents: 'box-none' }]}>
+      <View pointerEvents="box-none" style={styles.bottomDockContainer}>
         <View style={styles.dockBar}>
           <TouchableOpacity style={styles.dockItem} onPress={() => gameStateStore.setState('GARAGE')}>
             <Car size={18} color="#F5F7FA" />

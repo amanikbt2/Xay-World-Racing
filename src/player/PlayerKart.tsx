@@ -21,7 +21,7 @@ const CageBar: React.FC<{ position: [number, number, number]; rotation: [number,
 
 export const PlayerKart: React.FC<PlayerKartProps> = ({ physics, color = '#C8102E' }) => {
   const groupRef = useRef<THREE.Group>(null);
-  const wheelRefs = useRef<Array<THREE.Mesh | null>>([]);
+  const wheelRefs = useRef<(THREE.Mesh | null)[]>([]);
   const boostLightRef = useRef<THREE.PointLight>(null);
   const hitLightRef = useRef<THREE.PointLight>(null);
 
