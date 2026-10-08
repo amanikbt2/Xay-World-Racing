@@ -47,6 +47,11 @@
         }
       ]
     ],
-    "owner": "amanikbt1"
+    "owner": "amanikbt1",
+    "extra": {
+      "eas": {
+        "projectId": "ae4d6325-c971-4337-9c16-3e98f3967dd7"
+      }
+    }
   }
 }
