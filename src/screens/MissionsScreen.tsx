@@ -34,9 +34,35 @@ export const MissionsScreen: React.FC = () => {
     setShowLevelPicker(true);
   };
 
+  const renderSeasonCard = (season: SeasonData, index: number) => {
+    const unlockedLevels = season.levels.filter((level) => level.unlocked).length;
+
+    return (
+      <TouchableOpacity key={season.id} style={styles.seasonCard} onPress={() => openSeason(season)} activeOpacity={0.88}>
+        <View style={styles.seasonCardArt}>
+          <Image source={levelArt[index % levelArt.length]} style={styles.cardImage} resizeMode="cover" />
+          <View style={styles.imageShade} />
+          <View style={styles.seasonNumberBadge}>
+            {seasonIcon(season.iconName, true, 17)}
+            <Text style={styles.seasonNumber}>SEASON {index + 1}</Text>
+          </View>
+        </View>
+        <View style={styles.seasonCardBody}>
+          <Text style={styles.seasonCardTitle}>Season {index + 1}</Text>
+          <Text style={styles.seasonCardTheme}>{season.name}</Text>
+          <Text style={styles.seasonCardProgress}>{unlockedLevels} of {season.levels.length} levels unlocked</Text>
+          <View style={styles.seasonOpenButton}>
+            <Play size={13} color="#FFFFFF" fill="#FFFFFF" />
+            <Text style={styles.raceBtnText}>VIEW LEVELS</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   const renderLevelCard = (level: SubLevelData, index: number, picker = false) => {
     const unlocked = level.unlocked;
-    const image = picker ? (index === 0 ? levelArt[0] : background) : levelArt[index % levelArt.length];
+    const image = levelArt[index % levelArt.length];
 
     return (
       <View key={level.id} style={[styles.levelCard, picker && styles.pickerCard]}>
@@ -91,7 +117,7 @@ export const MissionsScreen: React.FC = () => {
           <Text style={styles.backText}>BACK</Text>
         </TouchableOpacity>
         <View style={styles.titlePlate}>
-          <Text style={styles.titleText}>{showLevelPicker ? 'SEASON: ' + selectedSeason.name.toUpperCase() : 'SELECT SEASON & LEVEL'}</Text>
+          <Text style={styles.titleText}>{showLevelPicker ? 'SEASON ' + (SEASONS_DATA.indexOf(selectedSeason) + 1) : 'SELECT SEASON'}</Text>
         </View>
         <View style={styles.headerSpacer} />
       </View>
@@ -103,19 +129,12 @@ export const MissionsScreen: React.FC = () => {
           </View>
         </ScrollView>
       ) : (
-        <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.seasonPillsRow}>
-            {SEASONS_DATA.map((season) => (
-              <TouchableOpacity key={season.id} style={styles.seasonPill} onPressIn={() => openSeason(season)} onPress={() => openSeason(season)} activeOpacity={0.85}>
-                {seasonIcon(season.iconName, false)}
-                <Text style={styles.seasonPillText}>{season.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cardsContainer}>
-            {selectedSeason.levels.slice(0, 3).map((level, index) => renderLevelCard(level, index))}
-          </ScrollView>
-        </>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.seasonList}>
+          <Text style={styles.sectionIntro}>Choose a season to view its levels</Text>
+          <View style={styles.seasonGrid}>
+            {SEASONS_DATA.map(renderSeasonCard)}
+          </View>
+        </ScrollView>
       )}
     </View>
   );
@@ -131,9 +150,18 @@ const styles = StyleSheet.create({
   backText: { color: '#FFFFFF', fontSize: 11, fontWeight: '900' },
   titlePlate: { paddingHorizontal: 25, paddingVertical: 8, borderBottomLeftRadius: 22, borderBottomRightRadius: 22, backgroundColor: 'rgba(43, 53, 65, 0.92)', borderWidth: 1.4, borderTopWidth: 0, borderColor: 'rgba(242, 246, 250, 0.56)' },
   titleText: { color: '#FFFFFF', fontSize: 19, fontWeight: '900', letterSpacing: 0.7 },
-  seasonPillsRow: { paddingHorizontal: 35, gap: 8, alignItems: 'center', height: 54, zIndex: 3 },
-  seasonPill: { height: 32, paddingHorizontal: 13, borderRadius: 18, backgroundColor: 'rgba(89, 101, 114, 0.9)', borderWidth: 1.2, borderColor: 'rgba(236, 242, 246, 0.5)', flexDirection: 'row', alignItems: 'center', gap: 5 },
-  seasonPillText: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
+  seasonList: { paddingHorizontal: 22, paddingBottom: 28, alignItems: 'center' },
+  sectionIntro: { color: '#E9EEF2', fontSize: 13, fontWeight: '800', marginBottom: 14, textAlign: 'center' },
+  seasonGrid: { width: '100%', maxWidth: 720, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 14 },
+  seasonCard: { width: 218, minHeight: 244, borderRadius: 16, overflow: 'hidden', backgroundColor: 'rgba(80, 91, 103, 0.9)', borderWidth: 1.5, borderColor: 'rgba(244, 248, 251, 0.68)', elevation: 9 },
+  seasonCardArt: { height: 108, overflow: 'hidden', position: 'relative', backgroundColor: '#2C3948' },
+  seasonNumberBadge: { position: 'absolute', left: 12, right: 12, top: 12, flexDirection: 'row', alignItems: 'center', gap: 7 },
+  seasonNumber: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', letterSpacing: 0.5 },
+  seasonCardBody: { padding: 12 },
+  seasonCardTitle: { color: '#FFFFFF', fontSize: 18, fontWeight: '900' },
+  seasonCardTheme: { color: '#BFD0DC', fontSize: 11, fontWeight: '800', marginTop: 2 },
+  seasonCardProgress: { color: '#E7EDF1', fontSize: 10, fontWeight: '700', marginTop: 13, marginBottom: 10 },
+  seasonOpenButton: { minHeight: 29, borderRadius: 7, backgroundColor: '#35C970', borderWidth: 1.2, borderColor: '#8AEEB0', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 5 },
   cardsContainer: { paddingHorizontal: 34, gap: 18, alignItems: 'center', paddingBottom: 22, zIndex: 2 },
   levelCard: { width: 184, minHeight: 306, borderRadius: 16, overflow: 'hidden', backgroundColor: 'rgba(80, 91, 103, 0.87)', borderWidth: 1.5, borderColor: 'rgba(244, 248, 251, 0.68)', elevation: 9 },
   cardImageWrap: { height: 108, overflow: 'hidden', position: 'relative', backgroundColor: '#2C3948' },

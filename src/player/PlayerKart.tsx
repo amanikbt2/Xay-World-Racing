@@ -8,17 +8,6 @@ interface PlayerKartProps {
   color?: string;
 }
 
-const CageBar: React.FC<{ position: [number, number, number]; rotation: [number, number, number]; length: number }> = ({
-  position,
-  rotation,
-  length,
-}) => (
-  <mesh position={position} rotation={rotation} castShadow>
-    <cylinderGeometry args={[0.075, 0.075, length, 8]} />
-    <meshStandardMaterial color="#CBD5E1" metalness={0.85} roughness={0.22} />
-  </mesh>
-);
-
 export const PlayerKart: React.FC<PlayerKartProps> = ({ physics, color = '#C8102E' }) => {
   const groupRef = useRef<THREE.Group>(null);
   const wheelRefs = useRef<(THREE.Mesh | null)[]>([]);
@@ -123,14 +112,6 @@ export const PlayerKart: React.FC<PlayerKartProps> = ({ physics, color = '#C8102
         <meshStandardMaterial color="#C68642" roughness={0.78} />
       </mesh>
 
-      {/* Silver roll cage */}
-      <CageBar position={[-0.78, 1.42, 0.48]} rotation={[0.16, 0, 0]} length={1.55} />
-      <CageBar position={[0.78, 1.42, 0.48]} rotation={[0.16, 0, 0]} length={1.55} />
-      <CageBar position={[-0.78, 1.46, -0.52]} rotation={[-0.12, 0, 0]} length={1.65} />
-      <CageBar position={[0.78, 1.46, -0.52]} rotation={[-0.12, 0, 0]} length={1.65} />
-      <CageBar position={[0, 1.94, 0.48]} rotation={[0, 0, Math.PI / 2]} length={1.65} />
-      <CageBar position={[0, 1.94, -0.52]} rotation={[0, 0, Math.PI / 2]} length={1.65} />
-
       {/* Suspension arms and shocks */}
       {[-1, 1].map((side) => (
         <group key={side}>
@@ -185,8 +166,41 @@ export const PlayerKart: React.FC<PlayerKartProps> = ({ physics, color = '#C8102
         <meshBasicMaterial color="#F8FAFC" />
       </mesh>
 
+      <ExhaustFlames isBoosting={physics.isBoosting} />
+
       <pointLight ref={boostLightRef} position={[0, 0.45, 1.3]} color="#FFA502" distance={5} />
       <pointLight ref={hitLightRef} position={[0, 0.8, 0]} color="#FF1F3D" distance={6} />
+    </group>
+  );
+};
+
+const ExhaustFlames: React.FC<{ isBoosting: boolean }> = ({ isBoosting }) => {
+  const flameRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (flameRef.current && isBoosting) {
+      const flicker = 1 + Math.sin(state.clock.elapsedTime * 40) * 0.25;
+      flameRef.current.scale.set(flicker, flicker, flicker * 1.4);
+    }
+  });
+
+  if (!isBoosting) return null;
+
+  return (
+    <group ref={flameRef} position={[0, 0.45, 1.45]}>
+      {[-0.4, 0.4].map((x, i) => (
+        <group key={i} position={[x, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <mesh position={[0, 0.6, 0]}>
+            <coneGeometry args={[0.22, 1.2, 12]} />
+            <meshBasicMaterial color="#00E5FF" transparent opacity={0.9} />
+          </mesh>
+          <mesh position={[0, 0.4, 0]}>
+            <coneGeometry args={[0.32, 0.8, 12]} />
+            <meshBasicMaterial color="#FF7A00" transparent opacity={0.8} />
+          </mesh>
+        </group>
+      ))}
+      <pointLight color="#00E5FF" intensity={6} distance={8} />
     </group>
   );
 };

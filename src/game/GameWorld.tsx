@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useRef } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 import { PlayerPhysics } from '../player/PlayerPhysics';
 import { PlayerKart } from '../player/PlayerKart';
 import { Track } from '../track/Track';
@@ -54,7 +55,7 @@ const GameLoopRunner: React.FC<{
       collisionSystem.update(physics);
       lapSystem.update(physics.position);
 
-      const playerProgress = Math.min(1, Math.max(0, Math.abs(physics.position.z - startPosition[2]) / Math.max(trackLength, 1)));
+      const playerProgress = Math.min(1, Math.max(0, Math.max(0, startPosition[2] - physics.position.z) / Math.max(trackLength, 1)));
       const racersAhead = aiProgress.current.filter((progress) => progress > playerProgress + 0.002).length;
       gameStateStore.updateMetrics({
         speed: Math.round(Math.abs(physics.speed)),
@@ -64,6 +65,7 @@ const GameLoopRunner: React.FC<{
         position: Math.min(AI_RACER_COUNT + 1, racersAhead + 1),
         totalRacers: AI_RACER_COUNT + 1,
         progressPercent: Math.round(playerProgress * 100),
+        racerProgress: [playerProgress, ...aiProgress.current],
       });
     }
   });
@@ -90,34 +92,41 @@ export const GameWorld: React.FC<GameWorldProps> = ({
   useEffect(() => {
     lapSystem.reset();
     collisionSystem.reset(trackData);
+    physics.updateTrackCurve(trackData.curvePoints, trackData.isClosed ?? false);
     physics.reset(trackData.startPosition, trackData.startHeading);
   }, [trackData, physics, lapSystem, collisionSystem]);
 
   return (
     <View style={styles.container}>
       <Canvas
-        shadows={Platform.OS === 'web'}
+        shadows
         camera={{ position: [0, 4.2, 9], fov: 60 }}
         style={styles.canvas}
-        gl={{ antialias: true, alpha: false }}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.2;
+        }}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       >
         <color attach="background" args={[env.bgColor]} />
         <fog attach="fog" args={[env.fogColor, env.fogNear, env.fogFar]} />
 
-        <ambientLight intensity={0.7} />
+        <hemisphereLight args={[env.sunColor, env.groundColor, 0.65]} />
+        <ambientLight intensity={0.5} />
         <directionalLight
           position={env.sunPosition}
-          intensity={1.4}
+          intensity={1.8}
           color={env.sunColor}
-          castShadow={Platform.OS === 'web'}
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-          shadow-camera-near={10}
-          shadow-camera-far={250}
-          shadow-camera-left={-60}
-          shadow-camera-right={60}
-          shadow-camera-top={60}
-          shadow-camera-bottom={-60}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-near={5}
+          shadow-camera-far={350}
+          shadow-camera-left={-100}
+          shadow-camera-right={100}
+          shadow-camera-top={100}
+          shadow-camera-bottom={-100}
+          shadow-bias={-0.0001}
         />
 
         <Track trackData={trackData} collisionSystem={collisionSystem} />

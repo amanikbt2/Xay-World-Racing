@@ -18,6 +18,8 @@ export class PlayerPhysics {
 
   private config: KartConfig = DEFAULT_KART_CONFIG;
 
+  private sampledTrackPoints: THREE.Vector3[] = [];
+
   constructor(initialPosition?: THREE.Vector3, initialHeading: number = 0) {
     if (initialPosition) {
       this.position.copy(initialPosition);
@@ -28,6 +30,13 @@ export class PlayerPhysics {
 
   public setConfig(config: KartConfig) {
     this.config = config;
+  }
+
+  public updateTrackCurve(curvePoints: [number, number, number][], isClosed: boolean = false) {
+    if (!curvePoints || curvePoints.length < 2) return;
+    const pts = curvePoints.map((p) => new THREE.Vector3(p[0], p[1], p[2]));
+    const curve = new THREE.CatmullRomCurve3(pts, isClosed, 'centripetal');
+    this.sampledTrackPoints = curve.getSpacedPoints(350);
   }
 
   public reset(pos: [number, number, number], initialHeading: number) {
@@ -121,6 +130,24 @@ export class PlayerPhysics {
 
     this.position.x += this.velocity.x * delta;
     this.position.z += this.velocity.z * delta;
-    this.position.y = GAME_PHYSICS.groundY;
+
+    // Dynamic 3D Track Elevation Height Sampling (Flyovers, Hills, Caves)
+    if (this.sampledTrackPoints.length > 0) {
+      let closestY = GAME_PHYSICS.groundY;
+      let minSqDist = Number.POSITIVE_INFINITY;
+      for (let i = 0; i < this.sampledTrackPoints.length; i++) {
+        const pt = this.sampledTrackPoints[i];
+        const dx = pt.x - this.position.x;
+        const dz = pt.z - this.position.z;
+        const sqDist = dx * dx + dz * dz;
+        if (sqDist < minSqDist) {
+          minSqDist = sqDist;
+          closestY = pt.y;
+        }
+      }
+      this.position.y = THREE.MathUtils.lerp(this.position.y, closestY, Math.min(1.0, delta * 16));
+    } else {
+      this.position.y = GAME_PHYSICS.groundY;
+    }
   }
 }

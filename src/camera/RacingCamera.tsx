@@ -46,9 +46,13 @@ export const RacingCamera: React.FC<RacingCameraProps> = ({ physics }) => {
     currentTarget.current.lerp(desiredTarget, lerpFactor);
     camera.lookAt(currentTarget.current);
 
-    // Dynamic FOV on boost
+    // Dynamic Camera Roll tilt into turns
+    const targetRoll = -physics.driftAngle * 0.45;
+    camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRoll, delta * 6);
+
+    // Dynamic FOV and boost camera shake
     const targetFov = physics.isBoosting 
-      ? GAME_PHYSICS.cameraFovBoost 
+      ? GAME_PHYSICS.cameraFovBoost + Math.sin(state.clock.elapsedTime * 40) * 0.8
       : GAME_PHYSICS.cameraFovNormal;
     camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, delta * 4);
     camera.updateProjectionMatrix();

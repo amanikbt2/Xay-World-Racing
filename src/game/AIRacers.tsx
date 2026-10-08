@@ -87,7 +87,7 @@ const AIRacer: React.FC<AIRacerProps> = ({ trackData, index, onProgress, onRacer
     const tangent = curve.getTangentAt(Math.min(progress + 0.001, 1)).normalize();
     const side = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
     point.addScaledVector(side, rival.lane);
-    point.y = 0.08 + Math.sin(progress * 60 + index) * 0.025;
+    point.y += 0.08 + Math.sin(progress * 60 + index) * 0.025;
     groupRef.current.position.copy(point);
     onRacerPosition(index, point);
     groupRef.current.rotation.y = Math.atan2(-tangent.x, -tangent.z);

@@ -15,7 +15,7 @@
       "buildNumber": "7"
     },
     "android": {
-      "versionCode": 7,
+      "versionCode": 8,
       "package": "com.amanikbt1.xayworldracing",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",

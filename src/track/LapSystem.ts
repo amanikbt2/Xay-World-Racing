@@ -22,7 +22,7 @@ export class LapSystem {
   }
 
   public reset() {
-    this.nextCheckpointIndex = 0;
+    this.nextCheckpointIndex = 1;
     this.currentLap = 1;
     this.isRaceFinished = false;
     this.raceStartTime = Date.now();

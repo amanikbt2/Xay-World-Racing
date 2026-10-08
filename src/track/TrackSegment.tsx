@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 
@@ -426,7 +426,6 @@ const CoastalCityScenery: React.FC = () => {
         <HoverDrone key={`drone-${idx}`} position={[x, y, z]} seed={seed} />
       ))}
 
-      <OverheadSmartGantry position={[0, 0, -120]} />
       <OverheadSmartGantry position={[75, 0, -310]} rotationY={0.4} />
       <OverheadSmartGantry position={[-30, 0, -620]} rotationY={-0.3} />
 
@@ -443,14 +442,6 @@ const CoastalCityScenery: React.FC = () => {
         </group>
       ))}
 
-      <mesh position={[24, 0.8, -400]}>
-        <boxGeometry args={[1.2, 1.6, 850]} />
-        <meshStandardMaterial color="#334155" roughness={0.6} />
-      </mesh>
-      <mesh position={[24, 1.65, -400]}>
-        <boxGeometry args={[0.3, 0.2, 850]} />
-        <meshStandardMaterial color="#00E5FF" emissive="#00E5FF" emissiveIntensity={0.8} />
-      </mesh>
     </group>
   );
 };
@@ -463,19 +454,60 @@ export interface PalmTreeProps {
 export const PalmTree: React.FC<PalmTreeProps> = ({ position, scale = [1, 1, 1] }) => {
   return (
     <group position={position} scale={scale}>
-      <mesh position={[0, 2.5, 0]} castShadow>
-        <cylinderGeometry args={[0.2, 0.35, 5, 8]} />
-        <meshStandardMaterial color="#8B5A2B" roughness={0.9} />
+      {/* Curved realistic segmented trunk */}
+      <mesh position={[0, 1.2, 0]} rotation={[0.08, 0, 0.05]} castShadow>
+        <cylinderGeometry args={[0.32, 0.42, 2.4, 12]} />
+        <meshStandardMaterial color="#5C3A21" roughness={0.88} />
       </mesh>
-      <group position={[0, 5, 0]}>
-        <mesh position={[0, 0, 0]} rotation={[0.3, 0, 0]}>
-          <coneGeometry args={[1.6, 0.4, 6]} />
-          <meshStandardMaterial color="#2ED573" roughness={0.5} />
+      <mesh position={[0.1, 3.2, 0.1]} rotation={[-0.06, 0, -0.08]} castShadow>
+        <cylinderGeometry args={[0.26, 0.32, 2.2, 12]} />
+        <meshStandardMaterial color="#6B4426" roughness={0.85} />
+      </mesh>
+      <mesh position={[0.02, 5.0, -0.02]} rotation={[0.04, 0, 0.06]} castShadow>
+        <cylinderGeometry args={[0.22, 0.26, 1.8, 12]} />
+        <meshStandardMaterial color="#7A4E2C" roughness={0.82} />
+      </mesh>
+
+      {/* Bark Ring Detailing */}
+      {[0.8, 1.8, 2.8, 3.8, 4.8].map((y, i) => (
+        <mesh key={i} position={[0.04 * (i % 2 === 0 ? 1 : -1), y, 0]}>
+          <torusGeometry args={[0.28 - i * 0.015, 0.03, 8, 16]} />
+          <meshStandardMaterial color="#3E2413" roughness={0.9} />
         </mesh>
-        <mesh position={[0, 0.2, 0]} rotation={[-0.3, 1, 0.2]}>
-          <coneGeometry args={[1.8, 0.4, 6]} />
-          <meshStandardMaterial color="#26DE81" roughness={0.5} />
+      ))}
+
+      {/* Hanging Coconut Cluster */}
+      {[-0.2, 0.2].map((x, i) => (
+        <mesh key={`coconut-${i}`} position={[x, 5.6, 0.15 * (i % 2 === 0 ? 1 : -1)]} castShadow>
+          <sphereGeometry args={[0.22, 10, 10]} />
+          <meshStandardMaterial color="#3D2510" roughness={0.7} />
         </mesh>
+      ))}
+
+      {/* 360 Degree Realistic Multi-Tiered Palm Crown */}
+      <group position={[0, 5.8, 0]}>
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((angleDeg, i) => {
+          const rad = (angleDeg * Math.PI) / 180;
+          return (
+            <group key={`frond-${i}`} rotation={[0.45 + (i % 2) * 0.12, rad, -0.2]}>
+              <mesh position={[0, 0, -1.8]} rotation={[-Math.PI / 2, 0, 0]} castShadow>
+                <coneGeometry args={[0.75, 3.6, 6]} />
+                <meshStandardMaterial color={i % 2 === 0 ? '#15803D' : '#166534'} roughness={0.45} />
+              </mesh>
+            </group>
+          );
+        })}
+        {[22.5, 112.5, 202.5, 292.5].map((angleDeg, i) => {
+          const rad = (angleDeg * Math.PI) / 180;
+          return (
+            <group key={`top-frond-${i}`} rotation={[0.25, rad, 0]}>
+              <mesh position={[0, 0, -1.4]} rotation={[-Math.PI / 2, 0, 0]} castShadow>
+                <coneGeometry args={[0.65, 2.8, 6]} />
+                <meshStandardMaterial color="#22C55E" roughness={0.4} />
+              </mesh>
+            </group>
+          );
+        })}
       </group>
     </group>
   );
@@ -489,18 +521,34 @@ export interface PineTreeProps {
 export const PineTree: React.FC<PineTreeProps> = ({ position, scale = [1, 1, 1] }) => {
   return (
     <group position={position} scale={scale}>
-      <mesh position={[0, 1.5, 0]} castShadow>
-        <cylinderGeometry args={[0.25, 0.4, 3, 8]} />
-        <meshStandardMaterial color="#4A2E19" roughness={0.9} />
+      {/* Textured Wood Trunk */}
+      <mesh position={[0, 1.8, 0]} castShadow>
+        <cylinderGeometry args={[0.3, 0.5, 3.6, 12]} />
+        <meshStandardMaterial color="#3F2612" roughness={0.9} />
       </mesh>
-      <mesh position={[0, 3.5, 0]} castShadow>
-        <coneGeometry args={[1.8, 3.5, 8]} />
-        <meshStandardMaterial color="#334155" roughness={0.4} />
-      </mesh>
-      <mesh position={[0, 4.5, 0]} castShadow>
-        <coneGeometry args={[1.3, 2.5, 8]} />
-        <meshStandardMaterial color="#F8FAFC" roughness={0.2} />
-      </mesh>
+      {/* 5-Tier Dense Evergreen Canopy */}
+      <group position={[0, 3.2, 0]}>
+        <mesh position={[0, 0, 0]} castShadow>
+          <coneGeometry args={[2.6, 2.2, 12]} />
+          <meshStandardMaterial color="#064E3B" roughness={0.6} />
+        </mesh>
+        <mesh position={[0, 1.4, 0]} castShadow>
+          <coneGeometry args={[2.1, 2.0, 12]} />
+          <meshStandardMaterial color="#047857" roughness={0.55} />
+        </mesh>
+        <mesh position={[0, 2.7, 0]} castShadow>
+          <coneGeometry args={[1.6, 1.8, 10]} />
+          <meshStandardMaterial color="#059669" roughness={0.5} />
+        </mesh>
+        <mesh position={[0, 3.9, 0]} castShadow>
+          <coneGeometry args={[1.1, 1.5, 8]} />
+          <meshStandardMaterial color="#10B981" roughness={0.45} />
+        </mesh>
+        <mesh position={[0, 4.9, 0]} castShadow>
+          <coneGeometry args={[0.6, 1.1, 8]} />
+          <meshStandardMaterial color="#34D399" roughness={0.4} />
+        </mesh>
+      </group>
     </group>
   );
 };
@@ -529,10 +577,16 @@ export interface RockProps {
 
 export const Rock: React.FC<RockProps> = ({ position, scale = [1, 1, 1] }) => {
   return (
-    <mesh position={[position[0], position[1] + (scale[1] * 0.5), position[2]]} scale={scale} castShadow receiveShadow>
-      <dodecahedronGeometry args={[1, 1]} />
-      <meshStandardMaterial color="#64748B" roughness={0.9} />
-    </mesh>
+    <group position={[position[0], position[1], position[2]]} scale={scale}>
+      <mesh position={[0, 0.7, 0]} rotation={[0.2, 0.4, 0.1]} castShadow receiveShadow>
+        <dodecahedronGeometry args={[1.4, 1]} />
+        <meshStandardMaterial color="#475569" roughness={0.85} metalness={0.15} />
+      </mesh>
+      <mesh position={[0.2, 1.2, 0]} rotation={[-0.1, 0.2, 0]} castShadow receiveShadow>
+        <dodecahedronGeometry args={[0.9, 1]} />
+        <meshStandardMaterial color="#15803D" roughness={0.9} />
+      </mesh>
+    </group>
   );
 };
 
@@ -598,3 +652,289 @@ export const FinishArch: React.FC<StartArchProps> = ({ position, rotationY = 0 }
     </group>
   );
 };
+
+export const Level2TrackStructures: React.FC = () => {
+  const flyoverPillars: [number, number, number, number][] = [
+    [85, 3.0, -240, 6],
+    [110, 4.5, -280, 9],
+    [135, 6.0, -330, 12],
+    [125, 6.0, -380, 12],
+    [110, 6.0, -420, 12],
+    [75, 4.0, -460, 8],
+    [45, 2.0, -500, 4],
+  ];
+
+  const caveTorches: [number, number, number][] = [
+    [-102, 9, -710],
+    [-118, 9, -710],
+    [-132, 9, -760],
+    [-148, 9, -810],
+    [-112, 5, -890],
+    [-92, 5, -890],
+  ];
+
+  return (
+    <group>
+      {/* --- FLYOVER BRIDGE STRUCTURES --- */}
+      {flyoverPillars.map(([x, midY, z, height], idx) => (
+        <group key={`pier-${idx}`} position={[x, 0, z]}>
+          <mesh position={[-6, height / 2, 0]} castShadow>
+            <cylinderGeometry args={[1.2, 1.8, height, 12]} />
+            <meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} />
+          </mesh>
+          <mesh position={[6, height / 2, 0]} castShadow>
+            <cylinderGeometry args={[1.2, 1.8, height, 12]} />
+            <meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} />
+          </mesh>
+          <mesh position={[0, height - 0.5, 0]}>
+            <boxGeometry args={[16, 1.2, 2.5]} />
+            <meshStandardMaterial color="#1E293B" metalness={0.8} roughness={0.2} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Flyover Peak Overhead Arch Cable Stay */}
+      <group position={[135, 12, -330]} rotation={[0, 0.4, 0]}>
+        <mesh position={[0, 10, 0]} rotation={[Math.PI, 0, 0]} castShadow>
+          <torusGeometry args={[11, 0.8, 12, 24, Math.PI]} />
+          <meshStandardMaterial color="#00E5FF" emissive="#00E5FF" emissiveIntensity={0.6} metalness={0.9} />
+        </mesh>
+        <pointLight position={[0, 8, 0]} color="#00E5FF" intensity={6} distance={40} />
+      </group>
+
+      {/* --- MOUNTAIN HILL & CAVE TUNNEL STRUCTURES --- */}
+      {/* Mountain Hill Outer Mass */}
+      <group position={[-125, 0, -790]}>
+        <mesh position={[0, 18, 0]} castShadow receiveShadow>
+          <dodecahedronGeometry args={[52, 2]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.88} />
+        </mesh>
+        <mesh position={[10, 24, 0]} castShadow receiveShadow>
+          <dodecahedronGeometry args={[42, 2]} />
+          <meshStandardMaterial color="#0F172A" roughness={0.9} />
+        </mesh>
+        <mesh position={[-20, 22, 10]} castShadow receiveShadow>
+          <dodecahedronGeometry args={[38, 2]} />
+          <meshStandardMaterial color="#15803D" roughness={0.8} />
+        </mesh>
+      </group>
+
+      {/* Cave Entrance Archway */}
+      <group position={[-110, 8, -720]} rotation={[0, -0.4, 0]}>
+        <mesh position={[-8, 4, 0]} castShadow>
+          <boxGeometry args={[3.5, 10, 4]} />
+          <meshStandardMaterial color="#334155" roughness={0.9} />
+        </mesh>
+        <mesh position={[8, 4, 0]} castShadow>
+          <boxGeometry args={[3.5, 10, 4]} />
+          <meshStandardMaterial color="#334155" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 9.5, 0]} castShadow>
+          <boxGeometry args={[19.5, 3.5, 4.5]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.85} />
+        </mesh>
+        <mesh position={[0, 9.5, 2.3]}>
+          <planeGeometry args={[14, 2.0]} />
+          <meshStandardMaterial color="#FF6B00" emissive="#FF6B00" emissiveIntensity={0.8} />
+        </mesh>
+        <pointLight position={[0, 6, 3]} color="#FF7A00" intensity={8} distance={25} />
+      </group>
+
+      {/* Cave Tunnel Interior Cavern Shells & Glow Crystals */}
+      {[-740, -770, -800, -830, -860].map((z, idx) => {
+        const tX = -110 - idx * 6;
+        const tY = 8 - (idx > 2 ? (idx - 2) * 2 : 0);
+        return (
+          <group key={`cave-seg-${idx}`} position={[tX, tY, z]}>
+            <mesh position={[0, 4.5, 0]} rotation={[0, 0, Math.PI]} castShadow>
+              <torusGeometry args={[8.5, 2.8, 8, 16, Math.PI]} />
+              <meshStandardMaterial color="#0F172A" roughness={0.95} />
+            </mesh>
+            {/* Hanging Stalactites */}
+            <mesh position={[-3, 6.8, 0]} rotation={[Math.PI, 0, 0]}>
+              <coneGeometry args={[0.7, 3.2, 8]} />
+              <meshStandardMaterial color="#475569" roughness={0.9} />
+            </mesh>
+            <mesh position={[4, 7.2, 0]} rotation={[Math.PI, 0, 0]}>
+              <coneGeometry args={[0.8, 3.6, 8]} />
+              <meshStandardMaterial color="#475569" roughness={0.9} />
+            </mesh>
+            {/* Bioluminescent Cave Crystals */}
+            <mesh position={[-6.8, 2, 0]}>
+              <octahedronGeometry args={[1.2, 0]} />
+              <meshStandardMaterial color="#00E5FF" emissive="#00E5FF" emissiveIntensity={2.0} />
+            </mesh>
+            <mesh position={[6.8, 2, 0]}>
+              <octahedronGeometry args={[1.2, 0]} />
+              <meshStandardMaterial color="#FF7A00" emissive="#FF7A00" emissiveIntensity={2.0} />
+            </mesh>
+            <pointLight position={[0, 3, 0]} color={idx % 2 === 0 ? "#00E5FF" : "#FF7A00"} intensity={5} distance={22} />
+          </group>
+        );
+      })}
+
+      {/* Cave Exit Archway */}
+      <group position={[-100, 4, -900]} rotation={[0, 0.4, 0]}>
+        <mesh position={[-8, 4, 0]} castShadow>
+          <boxGeometry args={[3.5, 10, 4]} />
+          <meshStandardMaterial color="#334155" roughness={0.9} />
+        </mesh>
+        <mesh position={[8, 4, 0]} castShadow>
+          <boxGeometry args={[3.5, 10, 4]} />
+          <meshStandardMaterial color="#334155" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 9.5, 0]} castShadow>
+          <boxGeometry args={[19.5, 3.5, 4.5]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.85} />
+        </mesh>
+        <pointLight position={[0, 6, -3]} color="#FFE7A3" intensity={6} distance={20} />
+      </group>
+
+      {/* Torch Points */}
+      {caveTorches.map(([x, y, z], i) => (
+        <group key={`torch-${i}`} position={[x, y, z]}>
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[0.3, 1.2, 0.3]} />
+            <meshStandardMaterial color="#78350F" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.7, 0]}>
+            <sphereGeometry args={[0.35, 8, 8]} />
+            <meshBasicMaterial color="#FF7A00" />
+          </mesh>
+          <pointLight position={[0, 0.8, 0]} color="#FF7A00" intensity={4} distance={15} />
+        </group>
+      ))}
+    </group>
+  );
+};
+
+export const RainEffect: React.FC = () => {
+  const count = 1200;
+  const geomRef = useRef<THREE.BufferGeometry>(null);
+  const positions = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const p1 = Math.sin(i * 12.9898 + 78.233);
+      const p2 = Math.sin(i * 43.123 + 12.871);
+      const p3 = Math.sin(i * 91.567 + 34.561);
+      pos[i * 3] = p1 * 80;
+      pos[i * 3 + 1] = (p2 * 0.5 + 0.5) * 60;
+      pos[i * 3 + 2] = p3 * 80;
+    }
+    return pos;
+  }, []);
+
+  useFrame((state, delta) => {
+    if (!geomRef.current) return;
+    const posArr = geomRef.current.attributes.position.array as Float32Array;
+    const camPos = state.camera.position;
+    for (let i = 0; i < count; i++) {
+      posArr[i * 3 + 1] -= delta * 80;
+      posArr[i * 3] -= delta * 12;
+      if (posArr[i * 3 + 1] < 0) {
+        const offset = Math.sin(i * 17.13);
+        posArr[i * 3 + 1] = 55 + (offset * 0.5 + 0.5) * 10;
+        posArr[i * 3] = camPos.x + Math.sin(i * 31.41) * 75;
+        posArr[i * 3 + 2] = camPos.z + Math.cos(i * 47.19) * 75;
+      }
+    }
+    geomRef.current.attributes.position.needsUpdate = true;
+  });
+
+  return (
+    <points>
+      <bufferGeometry ref={geomRef}>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[positions, 3]}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        color="#38BDF8"
+        size={0.45}
+        transparent
+        opacity={0.75}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
+  );
+};
+
+export const LightningEffect: React.FC = () => {
+  const lightRef = useRef<THREE.DirectionalLight>(null);
+
+  useFrame((state) => {
+    if (lightRef.current) {
+      const time = state.clock.elapsedTime;
+      const flash = Math.sin(time * 0.75) > 0.985 || Math.sin(time * 2.8) > 0.992;
+      lightRef.current.intensity = flash ? 5.5 + Math.random() * 3.5 : 0;
+    }
+  });
+
+  return (
+    <directionalLight
+      ref={lightRef}
+      position={[0, 90, 0]}
+      color="#E0F2FE"
+      intensity={0}
+    />
+  );
+};
+
+export const Level3TrackStructures: React.FC = () => {
+  const boardwalkPillars: [number, number, number, number][] = [
+    [160, 5.0, -360, 10],
+    [150, 4.5, -410, 9],
+    [130, 4.0, -470, 8],
+    [90, 2.5, -510, 5],
+  ];
+
+  const puddles: [number, number, number, number][] = [
+    [-30, 0.04, -620, 4.5],
+    [-90, 0.04, -540, 5.2],
+    [-110, 0.04, -290, 4.0],
+  ];
+
+  return (
+    <group>
+      {/* --- ROARING CLIFFSIDE WATERFALL --- */}
+      <group position={[140, 0, -250]}>
+        <mesh position={[0, 12, 0]} castShadow receiveShadow>
+          <dodecahedronGeometry args={[26, 2]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.9} />
+        </mesh>
+        <mesh position={[-6, 7, 0]} rotation={[0.1, 0, 0]}>
+          <planeGeometry args={[14, 22]} />
+          <meshStandardMaterial color="#38BDF8" emissive="#0284C7" emissiveIntensity={0.6} transparent opacity={0.8} />
+        </mesh>
+        <pointLight position={[-6, 2, 0]} color="#38BDF8" intensity={8} distance={30} />
+      </group>
+
+      {/* --- WOODEN SEASIDE BOARDWALK PIERS --- */}
+      {boardwalkPillars.map(([x, midY, z, height], idx) => (
+        <group key={`bw-pier-${idx}`} position={[x, 0, z]}>
+          {[-7, 7].map((offset) => (
+            <mesh key={offset} position={[offset, height / 2, 0]} castShadow>
+              <cylinderGeometry args={[0.5, 0.7, height, 8]} />
+              <meshStandardMaterial color="#543A24" roughness={0.9} />
+            </mesh>
+          ))}
+          <mesh position={[0, height - 0.4, 0]}>
+            <boxGeometry args={[16, 0.8, 2.2]} />
+            <meshStandardMaterial color="#3E2715" roughness={0.88} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* --- RAIN PUDDLES ON TRACK --- */}
+      {puddles.map(([x, y, z, size], i) => (
+        <mesh key={`puddle-${i}`} position={[x, y, z]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[size, 16]} />
+          <meshStandardMaterial color="#0284C7" metalness={0.9} roughness={0.05} transparent opacity={0.75} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+

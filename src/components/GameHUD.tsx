@@ -58,6 +58,15 @@ export const GameHUD: React.FC = () => {
     inputManager.setTouchInput(key, false);
   };
 
+  const racerMarkers = [
+    { color: '#F8FAFC', label: 'P' },
+    { color: '#FFD166', label: 'S' },
+    { color: '#00D9FF', label: 'T' },
+    { color: '#FF7A45', label: 'C' },
+    { color: '#2ED573', label: 'P' },
+    { color: '#B57BFF', label: 'J' },
+  ];
+
   return (
     <View pointerEvents="box-none" style={styles.overlayContainer}>
       {/* Top Header Metrics Bar */}
@@ -68,14 +77,29 @@ export const GameHUD: React.FC = () => {
           <Text style={styles.statValue}>{metrics.position}<Text style={styles.statSub}>/{metrics.totalRacers}</Text></Text>
         </View>
 
-        {/* Lap / Progress */}
-        <View style={styles.statBadge}>
-          <Text style={styles.statLabel}>{metrics.totalLaps === 1 ? 'PROGRESS' : 'LAP'}</Text>
-          <Text style={styles.statValue}>
-            {metrics.totalLaps === 1
-              ? `${metrics.progressPercent}%`
-              : `${metrics.lap}/${metrics.totalLaps}`}
-          </Text>
+        {/* Race progress line */}
+        <View style={styles.raceProgressCard}>
+          <View style={styles.raceProgressHeader}>
+            <Text style={styles.statLabel}>{metrics.totalLaps === 1 ? 'RACE' : `LAP ${metrics.lap}/${metrics.totalLaps}`}</Text>
+            <Text style={styles.finishFlag}>🏁</Text>
+          </View>
+          <View style={styles.raceProgressLine}>
+            <View style={styles.startTick} />
+            {metrics.racerProgress.map((progress, index) => {
+              const marker = racerMarkers[index] ?? racerMarkers[0];
+              return (
+                <View
+                  key={index}
+                  style={[styles.racerMarker, { left: `${Math.min(100, Math.max(0, progress * 100))}%` }]}
+                >
+                  <View style={[styles.racerAvatar, { backgroundColor: marker.color }, index === 0 && styles.playerAvatar]}>
+                    <Text style={styles.racerAvatarText}>{index === 0 ? '★' : marker.label}</Text>
+                  </View>
+                </View>
+              );
+            })}
+            <View style={styles.finishTick} />
+          </View>
         </View>
 
         {/* Pause Button */}
@@ -269,6 +293,74 @@ const styles = StyleSheet.create({
   statSub: {
     fontSize: 14,
     color: Colors.textMuted,
+  },
+  raceProgressCard: {
+    width: 190,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(15, 23, 42, 0.78)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  raceProgressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 7,
+  },
+  finishFlag: {
+    fontSize: 13,
+  },
+  raceProgressLine: {
+    height: 5,
+    marginHorizontal: 4,
+    borderRadius: 4,
+    backgroundColor: 'rgba(248, 250, 252, 0.3)',
+    position: 'relative',
+  },
+  startTick: {
+    position: 'absolute',
+    left: 0,
+    top: -2,
+    width: 2,
+    height: 9,
+    backgroundColor: '#F8FAFC',
+  },
+  finishTick: {
+    position: 'absolute',
+    right: 0,
+    top: -3,
+    width: 3,
+    height: 11,
+    backgroundColor: '#FFD166',
+  },
+  racerMarker: {
+    position: 'absolute',
+    top: -8,
+    marginLeft: -7,
+    alignItems: 'center',
+  },
+  racerAvatar: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#0F172A',
+  },
+  playerAvatar: {
+    width: 17,
+    height: 17,
+    borderRadius: 9,
+    borderColor: '#FFFFFF',
+    marginTop: -2,
+  },
+  racerAvatarText: {
+    color: '#0F172A',
+    fontSize: 9,
+    fontWeight: '900',
   },
   pauseBtn: {
     backgroundColor: 'rgba(15, 23, 42, 0.85)',

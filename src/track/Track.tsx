@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { TrackConfigData } from './TrackConfig';
-import { PalmTree, Rock, PineTree, CyberCrystal, StartArch, FinishArch, BeachScenery } from './TrackSegment';
+import { PalmTree, Rock, PineTree, CyberCrystal, StartArch, FinishArch, BeachScenery, Level2TrackStructures, Level3TrackStructures, RainEffect, LightningEffect } from './TrackSegment';
 import { GoldenCoin, NitroBoostPad, MovingRoadHazard } from '../items/Collectible';
 import { CollisionSystem } from '../systems/CollisionSystem';
 
@@ -11,7 +11,7 @@ interface TrackProps {
 }
 
 export const Track: React.FC<TrackProps> = ({ trackData, collisionSystem }) => {
-  const { ribbonGeometry, shoulderGeometry, startPos, finishPos, startHeading, finishHeading } = useMemo(() => {
+  const { ribbonGeometry, shoulderGeometry, centerLineGeom, kerbLeftGeom, kerbRightGeom, startPos, finishPos, startHeading, finishHeading } = useMemo(() => {
     const points = trackData.curvePoints.map(
       (p) => new THREE.Vector3(p[0], p[1], p[2])
     );
@@ -62,10 +62,10 @@ export const Track: React.FC<TrackProps> = ({ trackData, collisionSystem }) => {
     for (let i = 0; i <= segments; i++) {
       const pt = curvePoints[i];
       const binormal = frenetFrames.binormals[i];
-      const left = pt.clone().addScaledVector(binormal, (roadWidth + 5) / 2);
-      const right = pt.clone().addScaledVector(binormal, -(roadWidth + 5) / 2);
+      const left = pt.clone().addScaledVector(binormal, (roadWidth + 6) / 2);
+      const right = pt.clone().addScaledVector(binormal, -(roadWidth + 6) / 2);
       shoulderPositions.push(left.x, left.y + 0.005, left.z, right.x, right.y + 0.005, right.z);
-      shoulderUvs.push(0, i / segments * 24, 1, i / segments * 24);
+      shoulderUvs.push(0, (i / segments) * 24, 1, (i / segments) * 24);
       if (i < segments) {
         const base = i * 2;
         shoulderIndices.push(base, base + 1, base + 2, base + 1, base + 3, base + 2);
@@ -75,6 +75,57 @@ export const Track: React.FC<TrackProps> = ({ trackData, collisionSystem }) => {
     shoulder.setAttribute('uv', new THREE.Float32BufferAttribute(shoulderUvs, 2));
     shoulder.setIndex(shoulderIndices);
     shoulder.computeVertexNormals();
+
+    // Yellow Centerline Strip
+    const centerPositions: number[] = [];
+    const centerIndices: number[] = [];
+    const centerWidth = 0.45;
+    for (let i = 0; i <= segments; i++) {
+      const pt = curvePoints[i];
+      const binormal = frenetFrames.binormals[i];
+      const left = pt.clone().addScaledVector(binormal, centerWidth / 2);
+      const right = pt.clone().addScaledVector(binormal, -centerWidth / 2);
+      centerPositions.push(left.x, left.y + 0.035, left.z, right.x, right.y + 0.035, right.z);
+      if (i < segments) {
+        const base = i * 2;
+        centerIndices.push(base, base + 1, base + 2, base + 1, base + 3, base + 2);
+      }
+    }
+    const centerLineGeom = new THREE.BufferGeometry();
+    centerLineGeom.setAttribute('position', new THREE.Float32BufferAttribute(centerPositions, 3));
+    centerLineGeom.setIndex(centerIndices);
+    centerLineGeom.computeVertexNormals();
+
+    // Red & White kerb edge strips
+    const kerbLeftPos: number[] = [];
+    const kerbRightPos: number[] = [];
+    const kerbIndices: number[] = [];
+    const kerbWidth = 0.85;
+    for (let i = 0; i <= segments; i++) {
+      const pt = curvePoints[i];
+      const binormal = frenetFrames.binormals[i];
+      const roadL = pt.clone().addScaledVector(binormal, roadWidth / 2);
+      const kerbL = pt.clone().addScaledVector(binormal, roadWidth / 2 + kerbWidth);
+      const roadR = pt.clone().addScaledVector(binormal, -roadWidth / 2);
+      const kerbR = pt.clone().addScaledVector(binormal, -(roadWidth / 2 + kerbWidth));
+
+      kerbLeftPos.push(roadL.x, roadL.y + 0.025, roadL.z, kerbL.x, kerbL.y + 0.025, kerbL.z);
+      kerbRightPos.push(roadR.x, roadR.y + 0.025, roadR.z, kerbR.x, kerbR.y + 0.025, kerbR.z);
+
+      if (i < segments) {
+        const base = i * 2;
+        kerbIndices.push(base, base + 1, base + 2, base + 1, base + 3, base + 2);
+      }
+    }
+    const kerbLeftGeom = new THREE.BufferGeometry();
+    kerbLeftGeom.setAttribute('position', new THREE.Float32BufferAttribute(kerbLeftPos, 3));
+    kerbLeftGeom.setIndex(kerbIndices);
+    kerbLeftGeom.computeVertexNormals();
+
+    const kerbRightGeom = new THREE.BufferGeometry();
+    kerbRightGeom.setAttribute('position', new THREE.Float32BufferAttribute(kerbRightPos, 3));
+    kerbRightGeom.setIndex(kerbIndices);
+    kerbRightGeom.computeVertexNormals();
 
     const p0 = curvePoints[0];
     const p1 = curvePoints[1];
@@ -87,6 +138,9 @@ export const Track: React.FC<TrackProps> = ({ trackData, collisionSystem }) => {
     return {
       ribbonGeometry: geometry,
       shoulderGeometry: shoulder,
+      centerLineGeom,
+      kerbLeftGeom,
+      kerbRightGeom,
       startPos: [p0.x, p0.y, p0.z] as [number, number, number],
       finishPos: [pLast.x, pLast.y, pLast.z] as [number, number, number],
       startHeading: computedStartHeading,
@@ -105,10 +159,31 @@ export const Track: React.FC<TrackProps> = ({ trackData, collisionSystem }) => {
       <mesh geometry={ribbonGeometry} receiveShadow castShadow>
         <meshStandardMaterial
           color={env.roadColor}
-          roughness={0.7}
-          metalness={0.1}
+          roughness={trackData.weather === 'rain' ? 0.15 : 0.6}
+          metalness={trackData.weather === 'rain' ? 0.55 : 0.2}
           side={THREE.DoubleSide}
         />
+      </mesh>
+
+      {/* Weather Particle & Lightning Effects */}
+      {trackData.weather === 'rain' && (
+        <>
+          <RainEffect />
+          <LightningEffect />
+        </>
+      )}
+
+      {/* Yellow Centerline */}
+      <mesh geometry={centerLineGeom}>
+        <meshStandardMaterial color="#FFC700" emissive="#FFC700" emissiveIntensity={0.4} roughness={0.3} />
+      </mesh>
+
+      {/* Red & White Kerb Edges */}
+      <mesh geometry={kerbLeftGeom} receiveShadow>
+        <meshStandardMaterial color="#EF4444" roughness={0.5} />
+      </mesh>
+      <mesh geometry={kerbRightGeom} receiveShadow>
+        <meshStandardMaterial color="#F8FAFC" roughness={0.5} />
       </mesh>
 
       {/* Terrain Base Plane */}
@@ -130,6 +205,8 @@ export const Track: React.FC<TrackProps> = ({ trackData, collisionSystem }) => {
       </mesh>
 
       {trackData.theme === 'Tropical Coast' && <BeachScenery cityUpgrade={trackData.id.endsWith('_lvl_1')} />}
+      {trackData.id === 'tropical_coast_lvl_2' && <Level2TrackStructures />}
+      {trackData.id === 'tropical_coast_lvl_3' && <Level3TrackStructures />}
 
       {/* Start Arch */}
       <StartArch position={startPos} rotationY={startHeading} />

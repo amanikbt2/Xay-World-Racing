@@ -19,6 +19,7 @@ export interface RaceMetrics {
   lap: number;
   totalLaps: number;
   progressPercent: number;
+  racerProgress: number[];
   position: number;
   totalRacers: number;
   timeSeconds: number;
@@ -45,6 +46,7 @@ class GameStateManager {
     lap: 1,
     totalLaps: 1,
     progressPercent: 0,
+    racerProgress: [0, 0, 0, 0, 0, 0],
     position: 1,
     totalRacers: 6,
     timeSeconds: 0,

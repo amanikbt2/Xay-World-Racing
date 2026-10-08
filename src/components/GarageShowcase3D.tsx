@@ -44,7 +44,7 @@ const MiniKart: React.FC<{ color: string; lane: number; offset: number }> = ({ c
         <boxGeometry args={[0.62, 0.18, 0.55]} />
         <meshStandardMaterial color="#172033" metalness={0.7} roughness={0.2} />
       </mesh>
-      {[-0.58, 0.58].flatMap((x) => [-0.48, 0.48].map((z) => (
+      {[-0.58, 0.58].map((x) => [-0.48, 0.48].map((z) => (
         <mesh key={x + z} position={[x, 0.22, z]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.22, 0.22, 0.2, 12]} />
           <meshStandardMaterial color="#151A24" roughness={0.9} />

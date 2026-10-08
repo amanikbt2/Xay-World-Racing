@@ -24,7 +24,7 @@ const DEFAULT_SAVE_DATA: UserSaveData = {
   coins: 250,
   xp: 0,
   trophies: 0,
-  unlockedTracks: ['tropical_coast_01'],
+  unlockedTracks: ['tropical_coast_lvl_1', 'tropical_coast_lvl_2', 'tropical_coast_lvl_3'],
   bestLapTimes: {},
   settings: {
     musicVolume: 0.8,
