@@ -47,11 +47,6 @@
         }
       ]
     ],
-    "extra": {
-      "eas": {
-        "projectId": "bbf36213-77cf-4de1-95b0-1c7193002bb8"
-      }
-    },
     "owner": "sliver4"
   }
 }
