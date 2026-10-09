@@ -1,0 +1,12 @@
+★ eas-cli@24.12.0 is now available.
+To upgrade, run:
+npm install -g eas-cli
+Proceeding with outdated version.
+
+Resolved "production" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+No environment variables with visibility "Plain text" and "Sensitive" found for the "production" environment on EAS.
+
+android.versionCode field in app config is ignored when version source is set to remote, but this value will still be in the manifest available via expo-constants. It's recommended to remove this value from app config.
+Project @amanikbt1/xayrush-racing with application ID "com.amanikbt1.xayworldracing" does not have any versionCode configured.
+Input is required, but stdin is not readable. Failed to display prompt: What version would you like to initialize it with?
+    Error: build:version:set command failed.
